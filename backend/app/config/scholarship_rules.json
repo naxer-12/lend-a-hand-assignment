@@ -1,0 +1,31 @@
+{
+  "version": "2026.1-GJ-SCHOLAR",
+  "scheme_name": "Mukhyamantri Yuva Swavalamban Yojana (MYSY)",
+  "rules": {
+    "income_criterion": {
+      "enabled": true,
+      "max_family_income": 600000.0,
+      "description": "Annual household family income must not exceed INR 6,00,000/-"
+    },
+    "attendance_criterion": {
+      "enabled": true,
+      "min_attendance_percentage": 75.0,
+      "description": "Student biometric attendance must be at least 75.0%"
+    },
+    "marks_criterion": {
+      "enabled": true,
+      "min_marks_percentage": 70.0,
+      "concession_categories": {
+        "SC": 55.0,
+        "ST": 55.0,
+        "OBC": 65.0
+      },
+      "description": "Preceding academic year aggregate marks requirement (70% General, with affirmative action relaxations)"
+    },
+    "domicile_criterion": {
+      "enabled": true,
+      "state": "Gujarat",
+      "description": "Candidate must be a bona fide resident studying in a recognized Gujarat educational institution"
+    }
+  }
+}

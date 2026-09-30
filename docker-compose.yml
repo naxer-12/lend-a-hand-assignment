@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: evidya-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: evidya_db
+      POSTGRES_USER: evidya_user
+      POSTGRES_PASSWORD: evidya_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evidya_user -d evidya_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: evidya-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: evidya-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql://evidya_user:evidya_secure_password_2026@db:5432/evidya_db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=gujarat-state-education-master-signing-key-2026
+      - AWS_REGION=ap-south-1
+      - AWS_S3_BUCKET_NAME=gujarat-evidya-income-certificates
+      - S3_MOCK_MODE=true
+      - S3_PRESIGNED_EXPIRATION_SECONDS=300
+      - UDISE_TIMEOUT_SECONDS=2.0
+      - UDISE_CIRCUIT_FAILURE_THRESHOLD=3
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: evidya-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
